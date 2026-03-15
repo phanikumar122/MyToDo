@@ -4,18 +4,13 @@ Follow these steps to host your Flutter app and Node.js backend online for free.
 
 ---
 
-## 1. Database: [Aiven](https://aiven.io/) or [TiDB Cloud](https://pingcap.com/products/tidb-cloud/)
-Choose a free MySQL hosting provider.
+## 1. Database: [TiDB Cloud](https://tidbcloud.com/) or [Clever Cloud](https://www.clever-cloud.com/)
+Since Aiven has high demand, **TiDB Cloud** is the best free alternative.
 
-1.  **Sign up** for a free account.
-2.  **Create a MySQL Instance**.
-3.  **Note the Connection Details**:
-    *   Host (e.g., `mysql-xxxx.aivencloud.com`)
-    *   Port (usually `3306`)
-    *   User (e.g., `avnadmin`)
-    *   Password
-    *   Database Name (e.g., `defaultdb`)
-4.  **Import Schema**: Use a tool like MySQL Workbench or the provider's console to run your table creation scripts.
+1.  **Sign up** for TiDB Cloud Serverless.
+2.  **Create a Cluster** (Select the Free/Serverless option).
+3.  **Click Connect**: note the Host, User, Port (usually 4000), and Password.
+4.  **Import Schema**: Use the built-in "SQL Editor" in the TiDB console to run your `schema.sql`.
 
 ---
 
@@ -31,49 +26,34 @@ Render is excellent for hosting Node.js APIs for free.
     *   **Root Directory**: `backend`
     *   **Build Command**: `npm install`
     *   **Start Command**: `node server.js`
-5.  **Environment Variables**: Click "Advanced" and add the following:
-    *   `DB_HOST`: (Your Aiven Host)
-    *   `DB_PORT`: `3306`
-    *   `DB_USER`: (Your Aiven User)
-    *   `DB_PASSWORD`: (Your Aiven Password)
-    *   `DB_NAME`: (Your Aiven DB Name)
-    *   `FIREBASE_SERVICE_ACCOUNT_PATH`: `./config/firebase-service-account.json`
+    *   `DATABASE_URL`: (Your Connection String - easier!)
+    *   `FIREBASE_SERVICE_ACCOUNT`: (Paste the minified JSON text here)
+
+> [!TIP]
+> To get the correct single-line JSON for Render, run this command in your `backend` folder:
+> `node scripts/minify-firebase.js`
+> Copy the output and paste it into Render.
 6.  **Deploy**: Click "Create Web Service". Once finished, you will get a URL like `https://todo-api.onrender.com`.
 
 ---
 
-## 3. Frontend: [Firebase Hosting](https://firebase.google.com/docs/hosting)
-Since you already use Firebase, this is the most seamless way to host the app.
+## 3. Frontend: Mobile App (APK Build)
+Instead of a website, we will build a real Android application file.
 
-1.  **Build Flutter for Web**:
+1.  **Build the APK**:
     ```bash
-    flutter build web --release
+    flutter build apk --release
     ```
-2.  **Install Firebase CLI**:
-    ```bash
-    npm install -g firebase-tools
-    ```
-3.  **Login and Initialize**:
-    ```bash
-    firebase login
-    firebase init hosting
-    ```
-    *   Select your project.
-    *   Set public directory to `build/web`.
-    *   Configure as a single-page app: **Yes**.
-4.  **Deploy**:
-    ```bash
-    firebase deploy --only hosting
-    ```
+2.  **Location**: Your app file is at `build/app/outputs/flutter-apk/app-release.apk`.
+3.  **Install**: Move this file to your phone and install it manually.
 
 ---
 
 ## 4. Final step: Update API URL
-In your Flutter project, update `lib/utils/constants.dart`:
+Before building the APK, ensure `lib/utils/constants.dart` has your **Render** URL:
 
 ```dart
-// OLD: const String kBaseUrl = 'http://10.0.2.2:3000/api';
-const String kBaseUrl = 'https://todo-api.onrender.com/api'; // Use your Render URL
+const String kProdUrl = 'https://todo-api.onrender.com/api'; 
 ```
 
 > [!NOTE]

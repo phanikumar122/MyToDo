@@ -1,17 +1,26 @@
 const admin = require('firebase-admin');
-require('dotenv').config();
-
-const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || './config/firebase-service-account.json';
 
 if (!admin.apps.length) {
   try {
-    const serviceAccount = require(require('path').resolve(serviceAccountPath));
+    let serviceAccount;
+
+    // Check if the environment variable exists
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      console.log('ℹ️ Using Firebase credentials from environment variable');
+    } else {
+      // Fall back to local file
+      serviceAccount = require('./firebase-service-account.json');
+      console.log('ℹ️ Using Firebase credentials from local file');
+    }
+
+    // Initialize Firebase Admin
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
     console.log('✅ Firebase Admin initialized');
   } catch (err) {
-    console.error('❌ Firebase Admin init failed. Ensure firebase-service-account.json exists in backend/config/.', err.message);
+    console.error('❌ Firebase Admin init failed:', err.message);
     process.exit(1);
   }
 }

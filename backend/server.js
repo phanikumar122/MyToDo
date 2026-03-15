@@ -3,6 +3,13 @@ const express = require('express');
 const cors    = require('cors');
 
 // Initialize Firebase Admin (must happen before route imports that use it)
+console.log('--- Environment Check ---');
+console.log(`Port: ${process.env.PORT || 3000}`);
+console.log(`Node Env: ${process.env.NODE_ENV || 'development'}`);
+console.log(`Database Host: ${process.env.DB_HOST || 'localhost'} (or using DATABASE_URL)`);
+console.log(`Firebase Config: ${process.env.FIREBASE_SERVICE_ACCOUNT ? 'SET (Env Var)' : (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ? 'SET (JSON Env Var)' : 'NOT SET (Fallback to file)')}`);
+console.log('-------------------------');
+
 require('./config/firebase');
 
 const userRoutes = require('./routes/users');

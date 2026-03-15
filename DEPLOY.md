@@ -29,22 +29,26 @@ We need to get your code from your laptop onto the internet.
 
 ---
 
-## 💾 STAGE 2: Setting up the Online Memory (Aiven)
-Aiben provides a free Database (Memory) for your app.
+## 💾 STAGE 2: Setting up the Online Memory (TiDB Cloud)
+TiDB Cloud provides a powerful free "Serverless" MySQL database.
 
-1.  Go to [Aiven.io](https://aiven.io/) and Sign Up.
-2.  On your dashboard, click **"Create service"**.
-3.  Click **MySQL**.
-4.  Scroll down to **"Service Plan"**. Select the **"Free"** plan (it's at the very bottom).
-5.  Pick a location (usually `google-us-east4` or whatever is closest to you).
-6.  Click the blue **"Create service"** button.
-7.  **Wait 3-5 minutes.** The status will change from "Rebuilding" to a green **"Running"**.
-8.  Look at the **"Connection information"** section. Click the **"Copy"** icon next to each of these and save them in a Notepad file:
-    - **Host**: (Looks like `mysql-xxxx.aivencloud.com`)
-    - **Port**: (Usually `3306`)
-    - **User**: (Usually `avnadmin`)
-    - **Password**: (Click the eye icon to see it, then copy)
-    - **Database Name**: (Usually `defaultdb`)
+1.  Go to [TiDB Cloud](https://tidbcloud.com/) and Sign Up (you can use Google or GitHub).
+2.  Click **"Create Cluster"**. Select **"Serverless"** (it is the free one).
+3.  Choose a region near you (e.g., AWS us-east-1).
+4.  Click **"Create"**.
+5.  Once the cluster is created, click the **"Connect"** button.
+    - Set a **Password** for your database user.
+    - Choose **"Connect with SQL Client"** or **"General"**.
+6.  **Copy these details**:
+    - **Host**: (e.g., `gateway01.us-east-1.prod.aws.tidbcloud.com`)
+    - **Port**: `4000` (Note: TiDB often uses 4000 instead of 3306)
+    - **User**: (e.g., `xxxxxx.root`)
+    - **Password**: (The one you just set)
+    - **Database Name**: `test` (or create a new one called `todo_app`)
+7.  **Import Schema**:
+    - In TiDB Cloud, click **"Chat2Query"** or **"SQL Editor"**.
+    - Copy the text from `backend/database/schema.sql` and paste it there.
+    - Run the code to create your tables.
 
 ---
 
@@ -56,47 +60,48 @@ Render is where your Node.js "Brain" will live.
 3.  You will see your GitHub project (`MyToDoApp`) in the list. Click **"Connect"**.
 4.  **Fill in these exact settings**:
     - **Name**: `todo-backend`
-    - **Region**: (Same as your Aiven location if possible)
+    - **Region**: (Same as your database location if possible)
     - **Root Directory**: `backend`
     - **Runtime**: `Node`
     - **Build Command**: `npm install`
     - **Start Command**: `node server.js`
-5.  **Environment Variables (CRITICAL)**: Click **"Advanced" -> "Add Environment Variable"**. Add these 5 items using your **Aiven** info:
-    - `DB_HOST` = (Your Aiven Host)
-    - `DB_PORT` = `3306`
-    - `DB_USER` = (Your Aiven User)
-    - `DB_PASSWORD` = (Your Aiven Password)
-    - `DB_NAME` = `defaultdb`
+5.  **Environment Variables**: Click **"Advanced" -> "Add Environment Variable"**. You can now use `DATABASE_URL` (easier) or individual bits from your `.env` file.
+    - `DATABASE_URL` = (Your TiDB Connection String - e.g., `mysql://user:pass@host:4000/todo_app`)
+    - `FIREBASE_SERVICE_ACCOUNT` = (Paste the minified JSON text of your service account file here)
+    - **Note**: The app also supports the old names `DB_HOST`, `DB_PORT`, etc., and `FIREBASE_SERVICE_ACCOUNT_JSON`.
 6.  Click **"Create Web Service"**.
 7.  **Wait.** Once it finishes, you will see a link at the top (e.g., `https://todo-backend.onrender.com`). **Save this link!**
 
 ---
 
-## 📱 STAGE 4: Connecting your App to the Brain
-Now we tell your Flutter app to stop looking at your laptop and start looking at Render.
+## 📱 STAGE 4: Generating your Mobile App (APK)
+Now we create the actual file you can install on any Android phone.
 
-1.  Open your project in your code editor.
-2.  Open the file: `lib/utils/constants.dart`.
-3.  Find the line that says `const String kProdUrl`.
-4.  Paste your Render link and add `/api` at the end. It should look like this:
-    ```dart
-    const String kProdUrl = 'https://todo-backend.onrender.com/api'; 
-    ```
-5.  **Final Step: Build it!**
+1.  **Update the "Brain" Address**:
+    - Open `lib/utils/constants.dart`.
+    - Paste your Render link into `kProdUrl` (e.g., `https://todo-backend.onrender.com/api`).
+2.  **Generate the App File**:
     - Open your terminal.
-    - Run `flutter build web --release`. 
-    - This creates a folder: `build/web`. This is your finished "website" app.
+    - Run this command: `flutter build apk --release`
+3.  **Find your App**:
+    - Once finished, go to this folder on your computer:
+      `build/app/outputs/flutter-apk/`
+    - Look for the file named: **`app-release.apk`**.
+4.  **Install it**:
+    - Upload this `app-release.apk` to your **Google Drive**.
+    - Open Google Drive on your physical phone, download the file, and tap "Install."
+    - **Note**: Your phone might say "Unsafe App" because you didn't download it from the Play Store. Click "Install anyway."
 
 ---
 
 ## 🏆 Checklist for a Perfect Deployment
 - [ ] Code is on GitHub?
-- [ ] Aiven MySQL is green and "Running"?
+- [ ] Database is green and "Running"?
 - [ ] Every Environment Variable in Render is spelled EXACTLY correct (all caps)?
 - [ ] The Render URL ends with `/api` in your Flutter code?
 
 ### 🆘 Help! It's not working...
 - **"Loading forever?"**: Refresh the page. Render's free Brain takes 30 seconds to wake up.
-- **"Database Error?"**: In Aiven, ensure you have ran the `schema.sql` code to create the tables. (Use a tool like MySQL Workbench to connect and paste the code from `backend/database/schema.sql`).
+- **"Database Error?"**: In your database console, ensure you have ran the `schema.sql` code to create the tables. (Use a tool like MySQL Workbench or the built-in SQL Editor to connect and paste the code from `backend/database/schema.sql`).
 
 **Congratulations! You have mastered the art of deployment!** 🎖️🚀

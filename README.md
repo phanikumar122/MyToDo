@@ -92,11 +92,11 @@ cd backend
 # Copy env template and fill in your credentials
 cp .env.example .env
 # Edit .env:
-#   DB_HOST=localhost
+#   DB_HOST=localhost (or use DATABASE_URL=mysql://...)
 #   DB_USER=root
 #   DB_PASSWORD=<your_mysql_password>
 #   DB_NAME=todo_app
-#   FIREBASE_SERVICE_ACCOUNT_PATH=./config/firebase-service-account.json
+#   FIREBASE_SERVICE_ACCOUNT=<your_json_string> (OR use FIREBASE_SERVICE_ACCOUNT_PATH=./config/...)
 
 npm install
 node server.js

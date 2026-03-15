@@ -1,7 +1,7 @@
 // Base URL of your backend API.
 // Use kProdUrl when deploying to a real server.
 const String kDevUrl  = 'http://10.0.2.2:3000/api'; // Android emulator → localhost
-const String kProdUrl = 'https://todo-api.onrender.com/api'; // Replace with your Render URL
+const String kProdUrl = 'https://mytodo-pa6g.onrender.com/api'; // Replace with your Render URL
 
 const String kBaseUrl = bool.fromEnvironment('dart.vm.product') ? kProdUrl : kDevUrl;
 

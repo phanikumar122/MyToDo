@@ -84,12 +84,11 @@ Now for the exciting part!
 ## ☁️ Phase 5: Going Online (The "Eternal" Setup)
 If you want the app to work even when your laptop is turned off, you must host it on the internet.
 
-### 1. Online Memory (Aiven)
-- Go to [Aiven.io](https://aiven.io/) and make a free account.
-- Click **"Create a new service"**. Pick **MySQL**.
-- Pick the **"Free"** plan.
-- Click **"Create Service"**.
-- Once the green light says "Running," copy the **Host**, **User**, and **Password**.
+### 1. Online Memory ([TiDB Cloud](https://tidbcloud.com/))
+- Create a free "Serverless" MySQL instance on TiDB Cloud.
+- Once created, click **"Connect"** and choose **"General"**.
+- Copy your new Host, User, and Password.
+- Use the **"SQL Editor"** inside TiDB Cloud to paste and run your `schema.sql` code.
 
 ### 2. Online Brain (Render)
 - Put your code on **GitHub**.
@@ -98,14 +97,24 @@ If you want the app to work even when your laptop is turned off, you must host i
 - Find your project and click "Connect."
 - **Settings**:
     - **Root Directory**: `backend`
-    - **Environment Variables**: Add each one from your `.env` file, but use the **Aiven** details instead of "localhost".
+    - **Environment Variables**: Add each one from your `.env` file. You can use **TiDB Cloud's** `DATABASE_URL` for the database connection (easier) and paste your Firebase JSON content into the `FIREBASE_SERVICE_ACCOUNT` environment variable.
+    - **Note**: The app now supports both `FIREBASE_SERVICE_ACCOUNT` (for JSON string) and the local file. For production, the JSON string is recommended.
 - Click **"Create Web Service"**.
 
-### 3. Update the App
-- Render will give you a link (e.g., `https://my-brain.onrender.com`).
-- Open `lib/utils/constants.dart`.
-- Change `kProdUrl` to your new link.
+### 3. Your Mobile App (APK)
+Since you want a real app, you don't need a website host. You just need the installable file for your phone.
+- Open a terminal in your project folder.
+- Run: `flutter build apk --release`.
+- **The Result**: Flutter creates a file called `app-release.apk` inside `build/app/outputs/flutter-apk/`.
+- **Sharing**: You can move this file to your phone via USB or upload it to Google Drive to share it with friends!
 
+### 4. Connect the Dots
+In `lib/utils/constants.dart`, ensure your App is looking at the new online Brain:
+```dart
+const String kProdUrl = 'https://your-api-url.onrender.com/api'; 
+```
+> [!IMPORTANT]
+> When you build the APK, Flutter automatically uses the `kProdUrl` because it's a "Release" build. Your app is now a real, portable mobile application!
 ---
 
 ## 🚀 Final Check
