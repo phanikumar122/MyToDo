@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TaskFlow — Personal Productivity To-Do App
 
 A full-stack personal productivity app built with **Flutter** (frontend) and **Node.js + MySQL** (backend), featuring Google Sign-In through Firebase Authentication.
@@ -196,3 +197,7 @@ The following are automatically included from Flutter packages. Verify `android/
 | Database | MySQL 8 |
 | Charts | fl_chart |
 | Notifications | flutter_local_notifications |
+=======
+# MyToDo
+A simple and efficient To-Do List mobile application built with Flutter, featuring Google Authentication for secure login. The app helps users manage daily tasks, stay organized, and track productivity with a clean and user-friendly interface.
+>>>>>>> 93e5d5604134d0e338b632598ece8ca3dae0c076
