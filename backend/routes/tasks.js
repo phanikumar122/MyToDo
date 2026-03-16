@@ -160,11 +160,14 @@ router.post('/', async (req, res) => {
 
   try {
     const [result] = await pool.execute(sql, args);
+    if (!result.insertId) {
+      throw new Error('Failed to retrieve insertId after task creation');
+    }
     const [[task]] = await pool.execute('SELECT * FROM tasks WHERE id = ?', [result.insertId]);
     res.status(201).json({ success: true, task });
   } catch (err) {
-    console.error('Create task error:', err);
-    res.status(500).json({ error: 'Failed to create task' });
+    console.error('Create task error details:', err);
+    res.status(500).json({ error: 'Failed to create task', details: err.message });
   }
 });
 

@@ -42,16 +42,11 @@ class AuthProvider extends ChangeNotifier {
         _user   = await _apiService.upsertUser();
         _status = AuthStatus.authenticated;
       } catch (e) {
-        _status = AuthStatus.authenticated;
-        // User object from Firebase if backend call fails
-        _user = UserModel(
-          id:        firebaseUser.uid,
-          googleId:  firebaseUser.uid,
-          name:      firebaseUser.displayName ?? 'User',
-          email:     firebaseUser.email ?? '',
-          profilePicture: firebaseUser.photoURL,
-          createdAt: DateTime.now(),
-        );
+        _status = AuthStatus.unauthenticated;
+        _error  = 'Profile sync failed: ${e.toString().replaceFirst('Exception: ', '')}';
+        _user   = null;
+        // Optionally sign out from Firebase if backend sync fails to keep states consistent
+        await _authService.signOut();
       }
       _signInCompleter?.complete();
       _signInCompleter = null;

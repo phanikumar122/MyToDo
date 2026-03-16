@@ -58,7 +58,9 @@ class TaskProvider extends ChangeNotifier {
       _tasks = await _api.getTasks();
       _syncCustomCategories();
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = e.toString().contains('Exception: ') 
+          ? e.toString().replaceFirst('Exception: ', '') 
+          : e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -90,7 +92,9 @@ class TaskProvider extends ChangeNotifier {
       await loadStats();
       notifyListeners();
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = e.toString().contains('Exception: ') 
+          ? e.toString().replaceFirst('Exception: ', '') 
+          : e.toString();
       notifyListeners();
       rethrow;
     }
@@ -116,7 +120,9 @@ class TaskProvider extends ChangeNotifier {
       await loadStats();
       notifyListeners();
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = e.toString().contains('Exception: ') 
+          ? e.toString().replaceFirst('Exception: ', '') 
+          : e.toString();
       notifyListeners();
       rethrow;
     }
@@ -134,7 +140,9 @@ class TaskProvider extends ChangeNotifier {
       await NotificationService().cancelNotification(id);
       notifyListeners();
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = e.toString().contains('Exception: ') 
+          ? e.toString().replaceFirst('Exception: ', '') 
+          : e.toString();
       notifyListeners();
       rethrow;
     }
