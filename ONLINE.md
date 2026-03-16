@@ -10,7 +10,7 @@ Since Aiven has high demand, **TiDB Cloud** is the best free alternative.
 1.  **Sign up** for TiDB Cloud Serverless.
 2.  **Create a Cluster** (Select the Free/Serverless option).
 3.  **Click Connect**: note the Host, User, Port (usually 4000), and Password.
-4.  **Import Schema**: Use the built-in "SQL Editor" in the TiDB console to run your `schema.sql`.
+4.  **Import Schema**: Use the built-in "SQL Editor" in the TiDB console to run your `schema.sql`. (TiDB provides a default database named `test`; our updated `schema.sql` uses it automatically).
 
 ---
 

@@ -24,11 +24,20 @@ const pool = mysql2.createPool({
 (async () => {
   try {
     const conn = await pool.getConnection();
-    console.log('✅ MySQL connected successfully');
+    
+    // Get current database name to diagnose if it's 'test'
+    const [[{ dbName }]] = await conn.query('SELECT DATABASE() as dbName');
+    
+    console.log(`✅ MySQL connected successfully to database: ${dbName}`);
+    
     conn.release();
   } catch (err) {
     console.error('❌ MySQL connection failed:', err.message);
-    process.exit(1);
+    // On Render, we might not want to exit immediately if DB is temporarily down,
+    // but for initial startup validation, it's safer.
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   }
 })();
 

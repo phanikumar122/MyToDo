@@ -58,9 +58,10 @@ The brain needs to wake up before the app can talk to it.
       DB_HOST=localhost
       DB_USER=root
       DB_PASSWORD=YOUR_PAPER_PASSWORD
-      DB_NAME=todo_app
+      DB_NAME=test
       FIREBASE_SERVICE_ACCOUNT_PATH=./config/firebase-service-account.json
       ```
+    - `DB_NAME` = `test`
     - Replace `YOUR_PAPER_PASSWORD` with your real MySQL password. Save and close.
 5.  **Start it**: Type `node server.js` and hit Enter.
     - If it says **"Server running on port 3000"**, you are a genius! **KEEP THIS WINDOW OPEN.**
@@ -88,7 +89,7 @@ If you want the app to work even when your laptop is turned off, you must host i
 - Create a free "Serverless" MySQL instance on TiDB Cloud.
 - Once created, click **"Connect"** and choose **"General"**.
 - Copy your new Host, User, and Password.
-- Use the **"SQL Editor"** inside TiDB Cloud to paste and run your `schema.sql` code.
+- Use the **"SQL Editor"** inside TiDB Cloud to paste and run your `schema.sql` code. Ensure your `schema.sql` creates tables in a database named `test` or you specify `USE test;` at the beginning.
 
 ### 2. Online Brain (Render)
 - Put your code on **GitHub**.
@@ -97,7 +98,7 @@ If you want the app to work even when your laptop is turned off, you must host i
 - Find your project and click "Connect."
 - **Settings**:
     - **Root Directory**: `backend`
-    - **Environment Variables**: Add each one from your `.env` file. You can use **TiDB Cloud's** `DATABASE_URL` for the database connection (easier) and paste your Firebase JSON content into the `FIREBASE_SERVICE_ACCOUNT` environment variable.
+    - **Environment Variables**: Add each one from your `.env` file. You can use **TiDB Cloud's** `DATABASE_URL` for the database connection (easier) and paste your Firebase JSON content into the `FIREBASE_SERVICE_ACCOUNT` environment variable. Make sure `DB_NAME` is set to `test`.
     - **Note**: The app now supports both `FIREBASE_SERVICE_ACCOUNT` (for JSON string) and the local file. For production, the JSON string is recommended.
 - Click **"Create Web Service"**.
 
@@ -105,6 +106,7 @@ If you want the app to work even when your laptop is turned off, you must host i
 Since you want a real app, you don't need a website host. You just need the installable file for your phone.
 - Open a terminal in your project folder.
 - Run: `flutter build apk --release`.
+    - **Database Name**: test
 - **The Result**: Flutter creates a file called `app-release.apk` inside `build/app/outputs/flutter-apk/`.
 - **Sharing**: You can move this file to your phone via USB or upload it to Google Drive to share it with friends!
 

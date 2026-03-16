@@ -95,7 +95,7 @@ cp .env.example .env
 #   DB_HOST=localhost (or use DATABASE_URL=mysql://...)
 #   DB_USER=root
 #   DB_PASSWORD=<your_mysql_password>
-#   DB_NAME=todo_app
+#   DB_NAME=test
 #   FIREBASE_SERVICE_ACCOUNT=<your_json_string> (OR use FIREBASE_SERVICE_ACCOUNT_PATH=./config/...)
 
 npm install

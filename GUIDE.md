@@ -61,7 +61,7 @@ The backend is a Node.js server that talks to the database. It lives in the `bac
    DB_HOST=localhost
    DB_USER=root
    DB_PASSWORD=YOUR_MYSQL_PASSWORD_HERE
-   DB_NAME=todo_app
+   DB_NAME=test
    
    # Option 1: Provide full JSON string (for production like Render)
    FIREBASE_SERVICE_ACCOUNT={"type":"service_account",...}

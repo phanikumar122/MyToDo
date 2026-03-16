@@ -3,8 +3,10 @@
 -- Run: mysql -u root -p < backend/database/schema.sql
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS todo_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE todo_app;
+CREATE DATABASE IF NOT EXISTS test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE test;
+
+SET FOREIGN_KEY_CHECKS = 0;
 
 -- ============================================================
 -- Users Table
@@ -41,3 +43,5 @@ CREATE TABLE IF NOT EXISTS tasks (
     INDEX idx_priority  (priority),
     INDEX idx_category  (category)
 ) ENGINE=InnoDB;
+
+SET FOREIGN_KEY_CHECKS = 1;

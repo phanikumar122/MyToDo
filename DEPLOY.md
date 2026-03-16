@@ -66,9 +66,9 @@ Render is where your Node.js "Brain" will live.
     - **Build Command**: `npm install`
     - **Start Command**: `node server.js`
 5.  **Environment Variables**: Click **"Advanced" -> "Add Environment Variable"**. You can now use `DATABASE_URL` (easier) or individual bits from your `.env` file.
-    - `DATABASE_URL` = (Your TiDB Connection String - e.g., `mysql://user:pass@host:4000/todo_app`)
+    - `DATABASE_URL` = (Your TiDB Connection String - e.g., `mysql://user:pass@host:4000/test`)
     - `FIREBASE_SERVICE_ACCOUNT` = (Paste the minified JSON text of your service account file here)
-    - **Note**: The app also supports the old names `DB_HOST`, `DB_PORT`, etc., and `FIREBASE_SERVICE_ACCOUNT_JSON`.
+    - **Note**: The app also supports the old names `DB_HOST`, `DB_PORT`, etc., and `FIREBASE_SERVICE_ACCOUNT_JSON`. Make sure `DB_NAME` is set to `test`.
 6.  Click **"Create Web Service"**.
 7.  **Wait.** Once it finishes, you will see a link at the top (e.g., `https://todo-backend.onrender.com`). **Save this link!**
 
