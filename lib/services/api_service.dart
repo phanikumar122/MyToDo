@@ -28,7 +28,12 @@ class ApiService {
       headers: await _headers(),
     );
     _checkStatus(resp);
-    return UserModel.fromJson(jsonDecode(resp.body)['user'] as Map<String, dynamic>);
+    final body = _decodeBody(resp.body);
+    final userData = body['user'];
+    if (userData == null || userData is! Map<String, dynamic>) {
+      throw Exception('Invalid user response from server');
+    }
+    return UserModel.fromJson(userData);
   }
 
   // ── Tasks ──────────────────────────────────────────────────
@@ -45,8 +50,12 @@ class ApiService {
     });
     final resp = await http.get(uri, headers: await _headers());
     _checkStatus(resp);
-    final List<dynamic> list = jsonDecode(resp.body)['tasks'] as List<dynamic>;
-    return list.map((e) => TaskModel.fromJson(e as Map<String, dynamic>)).toList();
+    final body = _decodeBody(resp.body);
+    final tasksList = body['tasks'];
+    if (tasksList == null || tasksList is! List<dynamic>) {
+      throw Exception('Invalid tasks list response');
+    }
+    return tasksList.map((e) => TaskModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<TaskModel> createTask(TaskModel task) async {
@@ -71,7 +80,12 @@ class ApiService {
       body: jsonEncode(task.toJson()),
     );
     _checkStatus(resp);
-    return TaskModel.fromJson(jsonDecode(resp.body)['task'] as Map<String, dynamic>);
+    final body = _decodeBody(resp.body);
+    final taskData = body['task'];
+    if (taskData == null || taskData is! Map<String, dynamic>) {
+      throw Exception('Invalid update task response');
+    }
+    return TaskModel.fromJson(taskData);
   }
 
   Future<void> deleteTask(int id) async {
@@ -88,7 +102,12 @@ class ApiService {
       headers: await _headers(),
     );
     _checkStatus(resp);
-    return jsonDecode(resp.body)['stats'] as Map<String, dynamic>;
+    final body = _decodeBody(resp.body);
+    final statsData = body['stats'];
+    if (statsData == null || statsData is! Map<String, dynamic>) {
+      throw Exception('Invalid stats response');
+    }
+    return statsData;
   }
 
   // ── Helpers ────────────────────────────────────────────────
