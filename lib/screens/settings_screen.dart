@@ -104,7 +104,7 @@ class SettingsScreen extends StatelessWidget {
                 ListTile(
                   leading:   Icon(Icons.code_rounded, color: colors.primary),
                   title:     const Text('Built with Flutter & Firebase'),
-                  subtitle:  const Text('Node.js + MySQL backend'),
+                  subtitle:  const Text('Node.js + MongoDB Atlas backend'),
                 ),
               ],
             ),

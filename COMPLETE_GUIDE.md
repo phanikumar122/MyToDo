@@ -1,128 +1,90 @@
-# 📔 The No-Experience-Required Manual: TaskFlow Deployment
+# Complete Guide
 
-Welcome to the **Master Guide**. This document is designed for someone who has never touched code, never seen a "terminal," and doesn't know what a "database" is. We will go slow, and we will explain everything.
+This guide is the slow, beginner-friendly version for running the app with MongoDB Atlas.
 
----
+## Phase 1: What You Are Setting Up
 
-## 🧐 Lesson 0: The Dictionary (Read this first!)
-Before we start, let's learn the "nerd words" we will be using:
-*   **Terminal / Command Prompt**: A window where you type text to tell your computer what to do, instead of clicking icons.
-*   **Folder / Directory**: The same thing. A place on your computer that holds files.
-*   **Repository (Repo)**: A project folder that is "tracked" so you can upload it to the internet (GitHub).
-*   **Backend (The Brain)**: The part of the app that does the math and logic. It's invisible to the user.
-*   **Frontend (The Face)**: The actual app you see on your phone or browser.
-*   **Database (The Memory)**: Where your names and tasks are saved so they don't disappear when you close the app.
-*   **Environment Variables (.env)**: A secret list of passwords the "Brain" needs to work.
+The project has three pieces:
 
----
+- The Flutter app you run on your phone or emulator
+- The Node.js backend that receives API requests
+- MongoDB Atlas, which stores users and tasks online
 
-## 🛠️ Phase 1: The Installation Party
-You need to install these 4 things. Do not skip any!
+## Phase 2: Create the Database in MongoDB Atlas
 
-1.  **Node.js**: [Download here](https://nodejs.org/). 
-    - Click the button that says **"LTS"**. 
-    - Run the installer. Click "Next" until it's finished.
-2.  **MySQL Community Server**: [Download here](https://dev.mysql.com/downloads/installer/).
-    - Choose the "Web Community" installer.
-    - During setup, it will ask for a **Root Password**. **WRITE THIS DOWN ON PAPER.** You cannot reset it easily.
-3.  **Flutter**: [Follow this guide](https://docs.flutter.dev/get-started/install/windows).
-    - This is a bit long, but just follow the pictures on the Flutter website.
-4.  **Android Studio**: [Download here](https://developer.android.com/studio).
-    - This installs the "fake phone" (Emulator) we need to see the app.
+1. Go to MongoDB Atlas and create an account.
+2. Create a cluster.
+3. Open `Database Access` and create a database user.
+4. Open `Network Access` and allow your current IP.
+5. Click `Connect`, choose the Node.js driver, and copy the connection string.
+6. Replace the placeholder username and password in the string with the real ones.
 
----
+Your backend will use:
 
-## 💾 Phase 2: Setting up the "Memory" (MySQL)
-Your app needs a place to store tasks.
-
-1.  Click your Windows Start button, type **"Command Prompt"**, and open it.
-2.  Type this exactly: `mysql -u root -p` and hit Enter.
-3.  Type that password you wrote on paper (it will look like you aren't typing anything for security—just type it and hit Enter).
-4.  Open the folder where you have this project. Go to `backend/database/`. Right-click `schema.sql` and select **"Open with Notepad"**.
-5.  Press `Ctrl + A` to select everything, then `Ctrl + C` to copy.
-6.  Go back to that black terminal window, right-click to paste, and hit Enter.
-7.  Type `exit` and hit Enter. **Memory setup is done!**
-
----
-
-## 🧠 Phase 3: Starting the "Brain" (Backend)
-The brain needs to wake up before the app can talk to it.
-
-1.  Open a **New Command Prompt**.
-2.  We need to go into the backend folder. Type `cd ` (type cd and a space), then **drag the "backend" folder from your file explorer into the terminal window**. It will automatically type the path for you. Hit Enter.
-3.  Type `npm install` and hit Enter. Wait for the loading bar to finish.
-4.  **The Secret File**: In that `backend` folder, create a new text file. Rename it to exactly `.env`. 
-    - Open it with Notepad.
-    - Paste this inside:
-      ```env
-      DB_HOST=localhost
-      DB_USER=root
-      DB_PASSWORD=YOUR_PAPER_PASSWORD
-      DB_NAME=test
-      FIREBASE_SERVICE_ACCOUNT_PATH=./config/firebase-service-account.json
-      ```
-    - `DB_NAME` = `test`
-    - Replace `YOUR_PAPER_PASSWORD` with your real MySQL password. Save and close.
-5.  **Start it**: Type `node server.js` and hit Enter.
-    - If it says **"Server running on port 3000"**, you are a genius! **KEEP THIS WINDOW OPEN.**
-
----
-
-## 📱 Phase 4: Running the "Face" (The App)
-Now for the exciting part!
-
-1.  Open **Android Studio**. Click **"More Actions"** -> **"Virtual Device Manager"**.
-2.  Click the blue **"Create Device"** button. Pick a phone (like Pixel 7). Click Next until it's done.
-3.  Click the tiny **Play button (▶️)** next to your phone. A phone will appear on your screen! Wait for it to fully turn on.
-4.  Open a **Third Command Prompt**.
-5.  Type `cd ` and drag the **Main Project Folder** (the one with `pubspec.yaml`) into it. Hit Enter.
-6.  Type `flutter pub get` and hit Enter.
-7.  Type `flutter run` and hit Enter.
-8.  **Wait.** The first time takes about 5 minutes. Eventually, you will see your app on the fake phone!
-
----
-
-## ☁️ Phase 5: Going Online (The "Eternal" Setup)
-If you want the app to work even when your laptop is turned off, you must host it on the internet.
-
-### 1. Online Memory ([TiDB Cloud](https://tidbcloud.com/))
-- Create a free "Serverless" MySQL instance on TiDB Cloud.
-- Once created, click **"Connect"** and choose **"General"**.
-- Copy your new Host, User, and Password.
-- Use the **"SQL Editor"** inside TiDB Cloud to paste and run your `schema.sql` code. Ensure your `schema.sql` creates tables in a database named `test` or you specify `USE test;` at the beginning.
-
-### 2. Online Brain (Render)
-- Put your code on **GitHub**.
-- Go to [Render.com](https://render.com/). Sign in with GitHub.
-- Click **"New +"** -> **"Web Service"**.
-- Find your project and click "Connect."
-- **Settings**:
-    - **Root Directory**: `backend`
-    - **Environment Variables**: Add each one from your `.env` file. You can use **TiDB Cloud's** `DATABASE_URL` for the database connection (easier) and paste your Firebase JSON content into the `FIREBASE_SERVICE_ACCOUNT` environment variable. Make sure `DB_NAME` is set to `test`.
-    - **Note**: The app now supports both `FIREBASE_SERVICE_ACCOUNT` (for JSON string) and the local file. For production, the JSON string is recommended.
-- Click **"Create Web Service"**.
-
-### 3. Your Mobile App (APK)
-Since you want a real app, you don't need a website host. You just need the installable file for your phone.
-- Open a terminal in your project folder.
-- Run: `flutter build apk --release`.
-    - **Database Name**: test
-- **The Result**: Flutter creates a file called `app-release.apk` inside `build/app/outputs/flutter-apk/`.
-- **Sharing**: You can move this file to your phone via USB or upload it to Google Drive to share it with friends!
-
-### 4. Connect the Dots
-In `lib/utils/constants.dart`, ensure your App is looking at the new online Brain:
-```dart
-const String kProdUrl = 'https://your-api-url.onrender.com/api'; 
+```env
+MONGODB_URI=mongodb+srv://USERNAME:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority&appName=ToDoApp
+MONGODB_DB_NAME=todo_app
 ```
-> [!IMPORTANT]
-> When you build the APK, Flutter automatically uses the `kProdUrl` because it's a "Release" build. Your app is now a real, portable mobile application!
----
 
-## 🚀 Final Check
-If something doesn't work:
-1.  Is the **Backend Terminal** still open? (It must stay open for local use).
-2.  Did you type the **Secret Password** correctly in the `.env` file?
-3.  Is the **Fake Phone** turned on?
+You do not need to run any SQL file. The backend creates the MongoDB collections automatically.
 
-**You are now a developer!** Enjoy your new To-Do app! 🥇
+## Phase 3: Configure the Backend
+
+1. Open a terminal in the `backend/` folder.
+2. Run:
+
+```powershell
+npm install
+```
+
+3. Create a file named `backend/.env`.
+4. Put this inside:
+
+```env
+PORT=3000
+MONGODB_URI=YOUR_ATLAS_CONNECTION_STRING
+MONGODB_DB_NAME=todo_app
+FRONTEND_URL=http://localhost:3000
+FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account"...}
+```
+
+5. Save the file.
+6. Start the backend:
+
+```powershell
+npm run dev
+```
+
+If the connection works, the server will start and connect to Atlas.
+
+## Phase 4: Run the Flutter App
+
+Go back to the project root and run:
+
+```powershell
+flutter pub get
+flutter run
+```
+
+## Phase 5: What Gets Created in MongoDB
+
+The backend uses:
+
+- `users`
+- `tasks`
+- `counters`
+
+The `counters` collection is used to keep task IDs numeric so the current Flutter app continues working.
+
+See [backend/database/README.md](/c:/Users/phani/OneDrive/Documents/Projects/ToDo/backend/database/README.md) for the collection shape.
+
+## Phase 6: Common Problems
+
+- `Missing MONGODB_URI environment variable`
+  Add `MONGODB_URI` to `backend/.env`.
+- Atlas says your IP is blocked
+  Add your IP in `Network Access`.
+- `Authentication failed`
+  Recheck the database username and password in the connection string.
+- Google login works but the backend rejects requests
+  Recheck the Firebase Admin credentials in `.env`.

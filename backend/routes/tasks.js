@@ -1,102 +1,114 @@
 const express = require('express');
-const router  = express.Router();
-const pool    = require('../config/db');
+const router = express.Router();
 const verifyToken = require('../middleware/auth');
+const Task = require('../models/task');
+const { getNextSequence } = require('../models/counter');
 
-// All task routes require authentication
 router.use(verifyToken);
 
-/* ────────────────────────────────────────────────────────────
-   GET /api/tasks
-   Returns all tasks for the authenticated user.
-   Optional query params: status, priority, category
-──────────────────────────────────────────────────────────── */
+function serializeTask(task) {
+  return {
+    id: task.taskId,
+    user_id: task.userId,
+    title: task.title,
+    description: task.description,
+    priority: task.priority,
+    category: task.category,
+    deadline: task.deadline ? task.deadline.toISOString() : null,
+    status: task.status,
+    created_at: task.createdAt.toISOString(),
+    updated_at: task.updatedAt ? task.updatedAt.toISOString() : null,
+  };
+}
+
+function parseTaskId(idParam) {
+  const id = Number.parseInt(idParam, 10);
+  return Number.isNaN(id) ? null : id;
+}
+
 router.get('/', async (req, res) => {
   const uid = req.user.uid;
   const { status, priority, category } = req.query;
 
-  let sql    = 'SELECT * FROM tasks WHERE user_id = ?';
-  const args = [uid];
-
-  if (status)   { sql += ' AND status = ?';   args.push(status); }
-  if (priority) { sql += ' AND priority = ?'; args.push(priority); }
-  if (category) { sql += ' AND category = ?'; args.push(category); }
-
-  sql += ' ORDER BY deadline ASC, created_at DESC';
+  const query = { userId: uid };
+  if (status) query.status = status;
+  if (priority) query.priority = priority;
+  if (category) query.category = category;
 
   try {
-    const [tasks] = await pool.execute(sql, args);
-    res.json({ success: true, tasks });
+    const tasks = await Task.find(query).sort({ deadline: 1, createdAt: -1 });
+    res.json({ success: true, tasks: tasks.map(serializeTask) });
   } catch (err) {
     console.error('Get tasks error:', err);
     res.status(500).json({ error: 'Failed to fetch tasks' });
   }
 });
 
-/* ────────────────────────────────────────────────────────────
-   GET /api/tasks/stats
-   Returns productivity statistics for the authenticated user.
-──────────────────────────────────────────────────────────── */
 router.get('/stats', async (req, res) => {
   const uid = req.user.uid;
+
   try {
-    // Today's completed
-    const [[{ todayCompleted }]] = await pool.execute(`
-      SELECT COUNT(*) AS todayCompleted FROM tasks
-      WHERE user_id = ? AND status = 'completed'
-        AND DATE(updated_at) = CURDATE()
-    `, [uid]);
+    const tasks = await Task.find({ userId: uid }).lean();
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
 
-    // Total tasks
-    const [[{ total }]] = await pool.execute(
-      'SELECT COUNT(*) AS total FROM tasks WHERE user_id = ?', [uid]);
+    const todayCompleted = tasks.filter((task) => {
+      if (task.status !== 'completed' || !task.updatedAt) return false;
+      const updated = new Date(task.updatedAt);
+      updated.setHours(0, 0, 0, 0);
+      return updated.getTime() === today.getTime();
+    }).length;
 
-    // Completed total
-    const [[{ completed }]] = await pool.execute(
-      "SELECT COUNT(*) AS completed FROM tasks WHERE user_id = ? AND status = 'completed'", [uid]);
+    const total = tasks.length;
+    const completed = tasks.filter((task) => task.status === 'completed').length;
+    const overdue = tasks.filter(
+      (task) => task.status === 'pending' && task.deadline && new Date(task.deadline) < now
+    ).length;
 
-    // Weekly (last 7 days) daily breakdown
-    const [weekly] = await pool.execute(`
-      SELECT DATE(updated_at) AS day, COUNT(*) AS count
-      FROM tasks
-      WHERE user_id = ? AND status = 'completed'
-        AND updated_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-      GROUP BY DATE(updated_at)
-      ORDER BY day ASC
-    `, [uid]);
+    const weeklyMap = new Map();
+    for (let offset = 6; offset >= 0; offset -= 1) {
+      const day = new Date(today);
+      day.setDate(today.getDate() - offset);
+      const key = day.toISOString().slice(0, 10);
+      weeklyMap.set(key, 0);
+    }
 
-    // Streak — consecutive days with at least 1 completed task
-    const [streakRows] = await pool.execute(`
-      SELECT DISTINCT DATE(updated_at) AS day
-      FROM tasks
-      WHERE user_id = ? AND status = 'completed'
-      ORDER BY day DESC
-    `, [uid]);
-
-    let streak = 0;
-    if (streakRows.length) {
-      const today = new Date(); today.setHours(0,0,0,0);
-      for (let i = 0; i < streakRows.length; i++) {
-        const d = new Date(streakRows[i].day); d.setHours(0,0,0,0);
-        const expected = new Date(today); expected.setDate(today.getDate() - i);
-        if (d.getTime() === expected.getTime()) streak++;
-        else break;
+    for (const task of tasks) {
+      if (task.status !== 'completed' || !task.updatedAt) continue;
+      const key = new Date(task.updatedAt).toISOString().slice(0, 10);
+      if (weeklyMap.has(key)) {
+        weeklyMap.set(key, weeklyMap.get(key) + 1);
       }
     }
 
-    // Overdue tasks
-    const [[{ overdue }]] = await pool.execute(`
-      SELECT COUNT(*) AS overdue FROM tasks
-      WHERE user_id = ? AND status = 'pending' AND deadline < NOW()
-    `, [uid]);
+    const weekly = Array.from(weeklyMap.entries()).map(([day, count]) => ({ day, count }));
 
-    // By category
-    const [byCategory] = await pool.execute(`
-      SELECT category, COUNT(*) AS total,
-             SUM(status = 'completed') AS completed_count
-      FROM tasks WHERE user_id = ?
-      GROUP BY category
-    `, [uid]);
+    const completedDays = new Set(
+      tasks
+        .filter((task) => task.status === 'completed' && task.updatedAt)
+        .map((task) => new Date(task.updatedAt).toISOString().slice(0, 10))
+    );
+
+    let streak = 0;
+    for (let offset = 0; ; offset += 1) {
+      const day = new Date(today);
+      day.setDate(today.getDate() - offset);
+      const key = day.toISOString().slice(0, 10);
+      if (!completedDays.has(key)) break;
+      streak += 1;
+    }
+
+    const categoryMap = new Map();
+    for (const task of tasks) {
+      const key = task.category || 'Personal';
+      const entry = categoryMap.get(key) || { category: key, total: 0, completed_count: 0 };
+      entry.total += 1;
+      if (task.status === 'completed') {
+        entry.completed_count += 1;
+      }
+      categoryMap.set(key, entry);
+    }
 
     res.json({
       success: true,
@@ -108,7 +120,7 @@ router.get('/stats', async (req, res) => {
         streak,
         overdue,
         weekly,
-        byCategory,
+        byCategory: Array.from(categoryMap.values()),
       },
     });
   } catch (err) {
@@ -117,25 +129,24 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-/* ────────────────────────────────────────────────────────────
-   GET /api/tasks/:id   — single task
-──────────────────────────────────────────────────────────── */
 router.get('/:id', async (req, res) => {
   const uid = req.user.uid;
+  const taskId = parseTaskId(req.params.id);
+
+  if (taskId === null) {
+    return res.status(400).json({ error: 'Invalid task id' });
+  }
+
   try {
-    const [[task]] = await pool.execute(
-      'SELECT * FROM tasks WHERE id = ? AND user_id = ?', [req.params.id, uid]);
+    const task = await Task.findOne({ taskId, userId: uid });
     if (!task) return res.status(404).json({ error: 'Task not found' });
-    res.json({ success: true, task });
+    res.json({ success: true, task: serializeTask(task) });
   } catch (err) {
     console.error('Get task error:', err);
     res.status(500).json({ error: 'Failed to fetch task' });
   }
 });
 
-/* ────────────────────────────────────────────────────────────
-   POST /api/tasks   — create task
-──────────────────────────────────────────────────────────── */
 router.post('/', async (req, res) => {
   const uid = req.user.uid;
   const { title, description, priority, category, deadline, status } = req.body;
@@ -144,76 +155,69 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Title is required' });
   }
 
-  const sql = `
-    INSERT INTO tasks (user_id, title, description, priority, category, deadline, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `;
-  const args = [
-    uid,
-    title.trim(),
-    description   || null,
-    priority      || 'medium',
-    category      || 'Personal',
-    deadline      || null,
-    status        || 'pending',
-  ];
-
   try {
-    const [result] = await pool.execute(sql, args);
-    if (!result.insertId) {
-      throw new Error('Failed to retrieve insertId after task creation');
-    }
-    const [[task]] = await pool.execute('SELECT * FROM tasks WHERE id = ?', [result.insertId]);
-    res.status(201).json({ success: true, task });
+    const taskId = await getNextSequence('tasks');
+    const task = await Task.create({
+      taskId,
+      userId: uid,
+      title: title.trim(),
+      description: description || null,
+      priority: priority || 'medium',
+      category: category || 'Personal',
+      deadline: deadline ? new Date(deadline) : null,
+      status: status || 'pending',
+    });
+
+    res.status(201).json({ success: true, task: serializeTask(task) });
   } catch (err) {
     console.error('Create task error details:', err);
     res.status(500).json({ error: 'Failed to create task', details: err.message });
   }
 });
 
-/* ────────────────────────────────────────────────────────────
-   PUT /api/tasks/:id   — update task
-──────────────────────────────────────────────────────────── */
 router.put('/:id', async (req, res) => {
   const uid = req.user.uid;
+  const taskId = parseTaskId(req.params.id);
 
-  // First verify ownership
-  const [[existing]] = await pool.execute(
-    'SELECT id FROM tasks WHERE id = ? AND user_id = ?', [req.params.id, uid]);
-  if (!existing) {
-    return res.status(404).json({ error: 'Task not found or access denied' });
+  if (taskId === null) {
+    return res.status(400).json({ error: 'Invalid task id' });
   }
 
-  const { title, description, priority, category, deadline, status } = req.body;
-  const sql = `
-    UPDATE tasks SET
-      title       = COALESCE(?, title),
-      description = COALESCE(?, description),
-      priority    = COALESCE(?, priority),
-      category    = COALESCE(?, category),
-      deadline    = COALESCE(?, deadline),
-      status      = COALESCE(?, status)
-    WHERE id = ? AND user_id = ?
-  `;
   try {
-    await pool.execute(sql, [title, description, priority, category, deadline, status, req.params.id, uid]);
-    const [[task]] = await pool.execute('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
-    res.json({ success: true, task });
+    const existing = await Task.findOne({ taskId, userId: uid });
+    if (!existing) {
+      return res.status(404).json({ error: 'Task not found or access denied' });
+    }
+
+    const { title, description, priority, category, deadline, status } = req.body;
+
+    if (title !== undefined) existing.title = title;
+    if (description !== undefined) existing.description = description;
+    if (priority !== undefined) existing.priority = priority;
+    if (category !== undefined) existing.category = category;
+    if (deadline !== undefined) existing.deadline = deadline ? new Date(deadline) : null;
+    if (status !== undefined) existing.status = status;
+
+    await existing.save();
+
+    res.json({ success: true, task: serializeTask(existing) });
   } catch (err) {
     console.error('Update task error:', err);
     res.status(500).json({ error: 'Failed to update task' });
   }
 });
 
-/* ────────────────────────────────────────────────────────────
-   DELETE /api/tasks/:id   — delete task
-──────────────────────────────────────────────────────────── */
 router.delete('/:id', async (req, res) => {
   const uid = req.user.uid;
+  const taskId = parseTaskId(req.params.id);
+
+  if (taskId === null) {
+    return res.status(400).json({ error: 'Invalid task id' });
+  }
+
   try {
-    const [result] = await pool.execute(
-      'DELETE FROM tasks WHERE id = ? AND user_id = ?', [req.params.id, uid]);
-    if (result.affectedRows === 0) {
+    const deletedTask = await Task.findOneAndDelete({ taskId, userId: uid });
+    if (!deletedTask) {
       return res.status(404).json({ error: 'Task not found or access denied' });
     }
     res.json({ success: true, message: 'Task deleted' });
