@@ -23,10 +23,12 @@ async function connectToDatabase() {
   }
 
   try {
+    console.log('⏳ Connecting to MongoDB...');
     await connectPromise;
-    console.log(`MongoDB connected successfully to database: ${mongoose.connection.name}`);
+    console.log(`✅ MongoDB connected successfully to database: ${mongoose.connection.name}`);
     return mongoose.connection;
   } catch (err) {
+    console.error('❌ MongoDB connection error:', err.message);
     connectPromise = null;
     throw err;
   }
