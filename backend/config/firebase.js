@@ -5,8 +5,9 @@ if (!admin.apps.length) {
     let serviceAccount;
 
     // Check if the environment variable exists
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    if (process.env.FIREBASE_SERVICE_ACCOUNT || process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      const jsonStr = process.env.FIREBASE_SERVICE_ACCOUNT || process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+      serviceAccount = JSON.parse(jsonStr);
       console.log('ℹ️ Using Firebase credentials from environment variable');
     } else {
       // Fall back to local file

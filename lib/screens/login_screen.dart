@@ -64,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen>
           gradient: LinearGradient(
             colors: [
               colors.primary,
-              colors.primary.withOpacity(0.7),
+              colors.primary.withValues(alpha: 0.7),
               colors.surface,
             ],
             begin: Alignment.topLeft,
@@ -87,10 +87,10 @@ class _LoginScreenState extends State<LoginScreen>
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color:        Colors.white.withOpacity(0.15),
+                          color:        Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(32),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.3), width: 1),
+                              color: Colors.white.withValues(alpha: 0.3), width: 1),
                         ),
                         child: const Icon(
                           Icons.checklist_rounded,
@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen>
                         'Your personal productivity companion.\nStay focused, stay organized.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color:    Colors.white.withOpacity(0.85),
+                          color:    Colors.white.withValues(alpha: 0.85),
                           fontSize: 16,
                           height:   1.5,
                         ),
@@ -130,10 +130,10 @@ class _LoginScreenState extends State<LoginScreen>
                           return Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Text(
@@ -206,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen>
                         'By continuing you agree to our Terms of Service\nand Privacy Policy.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color:    Colors.white.withOpacity(0.6),
+                          color:    Colors.white.withValues(alpha: 0.6),
                           fontSize: 11,
                         ),
                       ),

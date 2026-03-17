@@ -88,7 +88,7 @@ class TaskCard extends StatelessWidget {
                               ? TextDecoration.lineThrough
                               : null,
                           color: task.isCompleted
-                              ? colors.onSurface.withOpacity(0.4)
+                              ? colors.onSurface.withValues(alpha: 0.4)
                               : colors.onSurface,
                         ),
                       ),
@@ -101,7 +101,7 @@ class TaskCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 12,
-                            color:    colors.onSurface.withOpacity(0.5),
+                            color:    colors.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -131,7 +131,7 @@ class TaskCard extends StatelessWidget {
                             Icon(
                               Icons.calendar_today_rounded,
                               size:  12,
-                              color: task.isOverdue ? colors.error : colors.onSurface.withOpacity(0.4),
+                              color: task.isOverdue ? colors.error : colors.onSurface.withValues(alpha: 0.4),
                             ),
                             const SizedBox(width: 3),
                             Text(
@@ -140,7 +140,7 @@ class TaskCard extends StatelessWidget {
                                 fontSize: 11,
                                 color: task.isOverdue
                                     ? colors.error
-                                    : colors.onSurface.withOpacity(0.5),
+                                    : colors.onSurface.withValues(alpha: 0.5),
                                 fontWeight: task.isOverdue ? FontWeight.w600 : null,
                               ),
                             ),

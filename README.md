@@ -112,5 +112,5 @@ Make sure your Flutter app points to the backend URL configured in `lib/utils/co
 
 - [GUIDE.md](/c:/Users/phani/OneDrive/Documents/Projects/ToDo/GUIDE.md): quick local setup
 - [COMPLETE_GUIDE.md](/c:/Users/phani/OneDrive/Documents/Projects/ToDo/COMPLETE_GUIDE.md): beginner-friendly walkthrough
-- [DEPLOY.md](/c:/Users/phani/OneDrive/Documents/Projects/ToDo/DEPLOY.md): deployment guide
+- [DEPLOY.md](/c:/Users/phani/OneDrive/Documents/Projects/ToDo/DEPLOY.md): development guide
 - [ONLINE.md](/c:/Users/phani/OneDrive/Documents/Projects/ToDo/ONLINE.md): short hosted setup notes
